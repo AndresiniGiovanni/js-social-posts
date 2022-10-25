@@ -83,13 +83,13 @@ const posts = [
 ];
 
 const containerPostList = document.getElementById("container");
+const userLiked = [];
 
-posts.forEach((value) => {
-  if (value.author.image === null) {
-    value.author.image = "https://unsplash.it/300/300?image=18";
-    const div = document.querySelector("post-meta__icon");
-  }
-});
+// posts.forEach((value) => {
+//   if (value.author.image === null) {
+//     value.author.image = "https://unsplash.it/300/300?image=18";
+//   }
+// });
 
 posts.forEach((value) => {
   const containerpost = document.createElement("div");
@@ -101,13 +101,13 @@ posts.forEach((value) => {
         <div class="post-meta__icon">
           <img
             class="profile-pic"
-            src= "${value.media}";
-            alt="Phil Mangione"
+            src= "${value.author.image}";
+            alt="${value.author.name}"
           />
         </div>
         <div class="post-meta__data">
           <div class="post-meta__author">${value.author.name}</div>
-          <div class="post-meta__time">4 mesi fa</div>
+          <div class="post-meta__time">${value.created}</div>
         </div>
       </div>
     </div>
@@ -115,15 +115,14 @@ posts.forEach((value) => {
       ${value.content}
     </div>
     <div class="post__image">
-      <img src= "${value.author.image}";
+      <img src= "${value.media}";
       alt="" 
       />
     </div>
     <div class="post__footer">
     <div class="likes js-likes">
-    <button class="btn">
         <div class="likes__cta">
-          <a class="like-button js-like-button" href="#" data-postid="1">
+          <a class="like-button js-like-button" href="#" data-postid="${value.id}">
             <i
               class="like-button__icon fas fa-thumbs-up"
               aria-hidden="true"
@@ -131,11 +130,9 @@ posts.forEach((value) => {
             <span class="like-button__label">Mi Piace</span>
           </a>
           </div>
-    </button>
         <div class="likes__counter">
-        
           Piace a
-          <b id="like-counter-1-${value.id}" class="js-likes-counter">${value.likes}</b> persone
+          <b id="like-counter-${value.id}" class="js-likes-counter">${value.likes}</b> persone
         </div>
       </div>
     </div>
@@ -144,19 +141,28 @@ posts.forEach((value) => {
 
   containerPostList.append(containerpost);
 });
-const btnLike = document.querySelector("a.js-like-button");
 
-function likes() {
-  posts.forEach((value) => {
-    const likeArr = [];
-    const counter = document.getElementsByClassName("js-likes-counter");
-    let counterHtml = parseInt(counter.item(0).innerHTML);
-    console.log(counterHtml);
+const likebutton = Array.from(document.querySelectorAll(".like-button"));
+likebutton.forEach((value, index) => {
+  value.addEventListener("click", function (e) {
+    e.preventDefault();
 
-    btnLike.classList.toggle("like-button--liked");
-    counterHtml += 1;
+    value.classList.toggle("like-button--liked");
 
-    console.log(counterHtml);
+    const postId = parseInt(value.dataset.postid);
+    const likes = document.getElementById("like-counter-" + postId);
+    const postIndex = posts.findIndex((value) => {
+      return value.id === postId;
+    });
+
+    const likeIndex = userLiked.indexOf(postId);
+    if (likeIndex !== -1) {
+      posts[postIndex].likes -= 1;
+      userLiked.splice(likeIndex, 1);
+    } else {
+      posts[postIndex].likes += 1;
+      userLiked.push(postId);
+    }
+    likes.innerHTML = posts[postIndex].likes;
   });
-}
-btnLike.addEventListener("click", likes);
+});
